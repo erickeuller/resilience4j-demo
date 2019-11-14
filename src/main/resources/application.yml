@@ -50,3 +50,11 @@ resilience4j.retry:
     instances:
         retryConnector:
             maxRetryAttempts: 5
+resilience4j.bulkhead:
+    configs:
+        default:
+            maxConcurrentCalls: 1
+    instances:
+        bulkheadConnector:
+            maxConcurrentCalls: 1
+
