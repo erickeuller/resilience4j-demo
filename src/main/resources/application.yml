@@ -40,6 +40,8 @@ resilience4j.circuitbreaker:
     instances:
         circuitBreakerConnector:
             baseConfig: default
+        resilienceConnector:
+            baseConfig: default
 resilience4j.retry:
     configs:
         default:
@@ -49,6 +51,8 @@ resilience4j.retry:
                 - org.springframework.web.client.HttpServerErrorException
     instances:
         retryConnector:
+            maxRetryAttempts: 5
+        resilienceConnector:
             maxRetryAttempts: 5
 resilience4j.bulkhead:
     configs:

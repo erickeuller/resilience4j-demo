@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.HttpServerErrorException;
 
 import io.github.resilience4j.micrometer.tagged.TaggedRetryMetrics;
+import io.github.resilience4j.retry.IntervalFunction;
 import io.github.resilience4j.retry.Retry;
 import io.github.resilience4j.retry.RetryConfig;
 import io.github.resilience4j.retry.RetryRegistry;
@@ -24,15 +25,15 @@ public class RetryController {
 
     private Retry retry;
 
-    public RetryController(RetryConnector connector) {
+    public RetryController(RetryConnector connector, RetryRegistry registry) {
         this.connector = connector;
 
         RetryConfig retryConfig = RetryConfig.custom()
                 .maxAttempts(3)
                 .waitDuration(Duration.ofMillis(1000))
                 .retryExceptions(HttpServerErrorException.class)
+                .intervalFunction(IntervalFunction.ofExponentialBackoff(1000, 1.5D))
                 .build();
-        RetryRegistry registry = RetryRegistry.ofDefaults();
 
         retry = registry.retry("retryDecorator", retryConfig);
         TaggedRetryMetrics
@@ -47,7 +48,6 @@ public class RetryController {
 
     @GetMapping("/failure-decorator")
     public ResponseEntity failureWithDecorator() throws Throwable {
-        Supplier<String> retryableFunction = Retry.decorateSupplier(retry, connector::failure);
-        return ResponseEntity.ok(retryableFunction.get());
+        return ResponseEntity.ok(Retry.decorateSupplier(retry, connector::failure));
     }
 }
