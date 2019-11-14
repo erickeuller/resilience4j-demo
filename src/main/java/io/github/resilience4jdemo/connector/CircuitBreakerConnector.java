@@ -13,6 +13,13 @@ public class CircuitBreakerConnector {
         throw new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+    public String timeOutFailure() {
+        try {
+            Thread.sleep(10000);
+        } catch (InterruptedException e) {}
+        return "failure";
+    }
+
     public String success() {
         return "Success call";
     }
