@@ -22,8 +22,22 @@ public class RetryController {
 
     private RetryConnector connector;
 
+    private Retry retry;
+
     public RetryController(RetryConnector connector) {
         this.connector = connector;
+
+        RetryConfig retryConfig = RetryConfig.custom()
+                .maxAttempts(3)
+                .waitDuration(Duration.ofMillis(1000))
+                .retryExceptions(HttpServerErrorException.class)
+                .build();
+        RetryRegistry registry = RetryRegistry.ofDefaults();
+
+        retry = registry.retry("retryDecorator", retryConfig);
+        TaggedRetryMetrics
+                .ofRetryRegistry(registry)
+                .bindTo(new SimpleMeterRegistry());
     }
 
     @GetMapping("/failure")
@@ -33,18 +47,6 @@ public class RetryController {
 
     @GetMapping("/failure-decorator")
     public ResponseEntity failureWithDecorator() throws Throwable {
-        RetryConfig retryConfig = RetryConfig.custom()
-                .maxAttempts(3)
-                .waitDuration(Duration.ofMillis(1000))
-                .retryExceptions(HttpServerErrorException.class)
-                .build();
-        RetryRegistry registry = RetryRegistry.ofDefaults();
-
-        Retry retry = registry.retry("retryConnector", retryConfig);
-        TaggedRetryMetrics
-                .ofRetryRegistry(registry)
-                .bindTo(new SimpleMeterRegistry());
-
         Supplier<String> retryableFunction = Retry.decorateSupplier(retry, connector::failure);
         return ResponseEntity.ok(retryableFunction.get());
     }

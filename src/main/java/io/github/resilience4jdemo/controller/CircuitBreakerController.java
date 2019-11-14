@@ -1,14 +1,21 @@
 package io.github.resilience4jdemo.controller;
 
+import com.sun.net.httpserver.HttpServer;
+import io.github.resilience4j.circuitbreaker.CircuitBreaker;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
+import io.github.resilience4j.micrometer.tagged.TaggedCircuitBreakerMetrics;
+import io.github.resilience4jdemo.connector.CircuitBreakerConnector;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.HttpServerErrorException;
 
-import io.github.resilience4j.circuitbreaker.CircuitBreaker;
-import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
-import io.github.resilience4jdemo.connector.CircuitBreakerConnector;
+import java.io.IOException;
+import java.time.Duration;
+import java.util.concurrent.TimeoutException;
 
 @RestController
 @RequestMapping("circuit-breaker")
@@ -16,8 +23,27 @@ public class CircuitBreakerController {
 
     private CircuitBreakerConnector connector;
 
+    private CircuitBreaker circuitBreaker;
+
     public CircuitBreakerController(CircuitBreakerConnector connector) {
         this.connector = connector;
+        CircuitBreakerConfig circuitBreakerConfig = CircuitBreakerConfig.custom()
+                .failureRateThreshold(50)
+                .waitDurationInOpenState(Duration.ofMillis(1000))
+                .permittedNumberOfCallsInHalfOpenState(2)
+                .slidingWindowSize(2)
+                .recordExceptions(IOException.class, TimeoutException.class, HttpServerErrorException.class, Throwable.class)
+                .build();
+
+        CircuitBreakerRegistry circuitBreakerRegistry =
+                CircuitBreakerRegistry.of(circuitBreakerConfig);
+
+        circuitBreaker = circuitBreakerRegistry
+                .circuitBreaker("name");
+
+        TaggedCircuitBreakerMetrics
+                .ofCircuitBreakerRegistry(circuitBreakerRegistry)
+                .bindTo(new SimpleMeterRegistry());
     }
 
     @GetMapping("/success")
@@ -32,9 +58,6 @@ public class CircuitBreakerController {
 
     @GetMapping("/failure-decorator")
     public ResponseEntity failureDecorator() {
-        CircuitBreakerConfig config = CircuitBreakerConfig.custom()
-                .recordExceptions(HttpServerErrorException.class)
-                .build();
-        return ResponseEntity.ok(CircuitBreaker.of("circuitBreaker", config).decorateSupplier(connector::failure).get());
+        return ResponseEntity.ok(CircuitBreaker.decorateSupplier(circuitBreaker, connector::failure).get());
     }
 }
