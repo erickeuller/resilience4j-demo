@@ -74,7 +74,6 @@ public class CircuitBreakerController {
                 .decorateFutureSupplier(TimeLimiter.of(config), futureSupplier);
 
         Callable callable = CircuitBreaker.decorateCallable(circuitBreaker, restrictedCall);
-        callable.call();
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(callable.call());
     }
 }
