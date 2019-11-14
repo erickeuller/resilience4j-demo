@@ -35,7 +35,7 @@ public class CircuitBreakerController {
                 .recordException(throwable -> throwable instanceof HttpServerErrorException)
                 .build();
 
-        circuitBreaker = circuitBreakerRegistry.circuitBreaker("circuitBreakerDecorator");
+        circuitBreaker = circuitBreakerRegistry.circuitBreaker("circuitBreakerDecorator", circuitBreakerConfig);
 
         TaggedCircuitBreakerMetrics
                 .ofCircuitBreakerRegistry(circuitBreakerRegistry)

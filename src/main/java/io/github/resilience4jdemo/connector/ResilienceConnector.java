@@ -8,7 +8,7 @@ import io.github.resilience4j.bulkhead.annotation.Bulkhead;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
 
-@CircuitBreaker(name = "resilienceConnector")
+@CircuitBreaker(name = "resilienceConnector", fallbackMethod = "fallback")
 @Retry(name = "resilienceConnector")
 @Component
 public class ResilienceConnector {
@@ -16,5 +16,9 @@ public class ResilienceConnector {
     @Bulkhead(name = "resilienceBulkhead")
     public String failure() {
         throw new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    private String fallback(RuntimeException e) {
+        return "Fallback response";
     }
 }

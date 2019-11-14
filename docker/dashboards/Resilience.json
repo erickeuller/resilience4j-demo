@@ -15,6 +15,8 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
+  "id": 3,
+  "iteration": 1573740287398,
   "links": [],
   "panels": [
     {
@@ -73,7 +75,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "resilience4j_retry_calls{application=\"resilience4j-demo\"}",
+          "expr": "resilience4j_retry_calls{application=\"resilience4j-demo\", name=\"$Retry\"}",
           "legendFormat": "{{name}} - {{kind}}",
           "refId": "A"
         }
@@ -130,6 +132,14 @@
       },
       "id": 8,
       "panels": [],
+      "repeat": "CircuitBreaker",
+      "scopedVars": {
+        "CircuitBreaker": {
+          "selected": true,
+          "text": "circuitBreakerConnector",
+          "value": "circuitBreakerConnector"
+        }
+      },
       "title": "Circuit breaker",
       "type": "row"
     },
@@ -172,13 +182,20 @@
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
+      "scopedVars": {
+        "CircuitBreaker": {
+          "selected": true,
+          "text": "circuitBreakerConnector",
+          "value": "circuitBreakerConnector"
+        }
+      },
       "seriesOverrides": [],
       "spaceLength": 10,
       "stack": false,
       "steppedLine": false,
       "targets": [
         {
-          "expr": "resilience4j_circuitbreaker_state{application=\"resilience4j-demo\"}",
+          "expr": "resilience4j_circuitbreaker_state{application=\"resilience4j-demo\", name=\"$CircuitBreaker\"}",
           "legendFormat": "{{name}} - {{state}}",
           "refId": "A"
         }
@@ -260,6 +277,13 @@
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
+      "scopedVars": {
+        "CircuitBreaker": {
+          "selected": true,
+          "text": "circuitBreakerConnector",
+          "value": "circuitBreakerConnector"
+        }
+      },
       "seriesOverrides": [],
       "spaceLength": 10,
       "stack": false,
@@ -323,6 +347,14 @@
       },
       "id": 12,
       "panels": [],
+      "repeat": "Bulkhead",
+      "scopedVars": {
+        "Bulkhead": {
+          "selected": true,
+          "text": "bulkheadDecorator",
+          "value": "bulkheadDecorator"
+        }
+      },
       "title": "Bulkhead",
       "type": "row"
     },
@@ -362,13 +394,20 @@
       "pointradius": 2,
       "points": false,
       "renderer": "flot",
+      "scopedVars": {
+        "Bulkhead": {
+          "selected": true,
+          "text": "bulkheadDecorator",
+          "value": "bulkheadDecorator"
+        }
+      },
       "seriesOverrides": [],
       "spaceLength": 10,
       "stack": false,
       "steppedLine": false,
       "targets": [
         {
-          "expr": "resilience4j_bulkhead_available_concurrent_calls{application=\"resilience4j-demo\"}",
+          "expr": "resilience4j_bulkhead_available_concurrent_calls{application=\"resilience4j-demo\", name=\"$Bulkhead\"}",
           "legendFormat": "{{name}}",
           "refId": "A"
         }
@@ -420,7 +459,129 @@
   "style": "dark",
   "tags": [],
   "templating": {
-    "list": []
+    "list": [
+      {
+        "allValue": null,
+        "current": {
+          "tags": [],
+          "text": "circuitBreakerConnector",
+          "value": [
+            "circuitBreakerConnector"
+          ]
+        },
+        "datasource": "Prometheus",
+        "definition": "label_values(resilience4j_circuitbreaker_state{}, name)",
+        "hide": 0,
+        "includeAll": false,
+        "label": null,
+        "multi": true,
+        "name": "CircuitBreaker",
+        "options": [
+          {
+            "selected": true,
+            "text": "circuitBreakerConnector",
+            "value": "circuitBreakerConnector"
+          },
+          {
+            "selected": false,
+            "text": "circuitBreakerDecorator",
+            "value": "circuitBreakerDecorator"
+          },
+          {
+            "selected": false,
+            "text": "resilienceConnector",
+            "value": "resilienceConnector"
+          }
+        ],
+        "query": "label_values(resilience4j_circuitbreaker_state{}, name)",
+        "refresh": 0,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "text": "resilienceConnector",
+          "value": "resilienceConnector"
+        },
+        "datasource": "Prometheus",
+        "definition": "label_values(resilience4j_retry_calls{}, name)",
+        "hide": 0,
+        "includeAll": false,
+        "label": null,
+        "multi": true,
+        "name": "Retry",
+        "options": [
+          {
+            "selected": true,
+            "text": "resilienceConnector",
+            "value": "resilienceConnector"
+          },
+          {
+            "selected": false,
+            "text": "retryConnector",
+            "value": "retryConnector"
+          },
+          {
+            "selected": false,
+            "text": "retryDecorator",
+            "value": "retryDecorator"
+          }
+        ],
+        "query": "label_values(resilience4j_retry_calls{}, name)",
+        "refresh": 0,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      },
+      {
+        "allValue": null,
+        "current": {
+          "text": "bulkheadConnector",
+          "value": "bulkheadConnector"
+        },
+        "datasource": "Prometheus",
+        "definition": "label_values(resilience4j_bulkhead_available_concurrent_calls{}, name)",
+        "hide": 0,
+        "includeAll": false,
+        "label": null,
+        "multi": true,
+        "name": "Bulkhead",
+        "options": [
+          {
+            "selected": false,
+            "text": "bulkheadConnector",
+            "value": "bulkheadConnector"
+          },
+          {
+            "selected": true,
+            "text": "bulkheadDecorator",
+            "value": "bulkheadDecorator"
+          }
+        ],
+        "query": "label_values(resilience4j_bulkhead_available_concurrent_calls{}, name)",
+        "refresh": 0,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+      }
+    ]
   },
   "time": {
     "from": "now-2m",
@@ -442,6 +603,6 @@
   },
   "timezone": "",
   "title": "Resilience",
-  "uid": "KJzByE1Wz",
-  "version": 1
+  "uid": "KJzByE1Wz123",
+  "version": 8
 }
