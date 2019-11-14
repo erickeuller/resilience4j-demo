@@ -30,17 +30,21 @@ public class CircuitBreakerController {
 
     private CircuitBreaker circuitBreaker;
 
-    public CircuitBreakerController(CircuitBreakerConnector connector, CircuitBreakerRegistry circuitBreakerRegistry) {
+    public CircuitBreakerController(CircuitBreakerConnector connector) {
         this.connector = connector;
         CircuitBreakerConfig circuitBreakerConfig = CircuitBreakerConfig.custom()
                 .failureRateThreshold(50)
                 .waitDurationInOpenState(Duration.ofMillis(1000))
                 .permittedNumberOfCallsInHalfOpenState(2)
+                .slidingWindowSize(2)
                 .recordExceptions(IOException.class, TimeoutException.class, HttpServerErrorException.class, Throwable.class)
-                .recordException(throwable -> throwable instanceof HttpServerErrorException)
                 .build();
 
-        circuitBreaker = circuitBreakerRegistry.circuitBreaker("circuitBreakerDecorator");
+        CircuitBreakerRegistry circuitBreakerRegistry =
+                CircuitBreakerRegistry.of(circuitBreakerConfig);
+
+        circuitBreaker = circuitBreakerRegistry
+                .circuitBreaker("name");
 
         TaggedCircuitBreakerMetrics
                 .ofCircuitBreakerRegistry(circuitBreakerRegistry)

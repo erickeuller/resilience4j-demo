@@ -3,10 +3,7 @@ package io.github.resilience4jdemo.controller;
 import io.github.resilience4j.bulkhead.Bulkhead;
 import io.github.resilience4j.bulkhead.BulkheadConfig;
 import io.github.resilience4j.bulkhead.BulkheadRegistry;
-import io.github.resilience4j.micrometer.tagged.TaggedBulkheadMetrics;
 import io.github.resilience4jdemo.connector.BulkheadConnector;
-import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -26,19 +23,17 @@ public class BulkheadController {
 
     private Bulkhead bulkhead;
 
-    public BulkheadController(BulkheadConnector connector, BulkheadRegistry registry) {
+    public BulkheadController(BulkheadConnector connector) {
         this.connector = connector;
         BulkheadConfig config = BulkheadConfig.custom()
                 .maxConcurrentCalls(1)
                 .maxWaitDuration(Duration.ofMillis(1))
                 .build();
 
-        bulkhead = registry.bulkhead("bulkheadDecorator", config);
+        BulkheadRegistry registry = BulkheadRegistry.of(config);
+        bulkhead = registry.bulkhead("bulckheadDecorator", config);
         bulkhead.getEventPublisher()
                 .onCallRejected(event -> logger.info(event.getBulkheadName()));
-        TaggedBulkheadMetrics
-                .ofBulkheadRegistry(registry)
-                .bindTo(new SimpleMeterRegistry());
     }
 
     @GetMapping("/success")
